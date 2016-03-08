@@ -225,6 +225,9 @@ void EscreveFicheiro ( char *ficheiro, st_texto *t )
   }
   printf ( "Count of distinct words: %d\n", (*t).n_dist_palavras );
   fclose ( f );
+
+  /* freeing memory*/
+  free(nome);
   return;
 }
 
@@ -255,5 +258,12 @@ int main ( int argc, char **argv )
   PreencheTabelaPalavras ( argv[1],&st_palavras );
   EscreveFicheiro ( argv[1], &st_palavras );
 
+
+  /* freeing memory */
+  for (i = 0; i < st_palavras.n_total_palavras; i++)
+    free(st_palavras.palavras[i]);
+  
+  free(st_palavras.ocorrencias);
+  free(st_palavras.palavras); 
   return (0);
 }
