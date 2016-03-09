@@ -118,14 +118,15 @@ void AlocaTabelaPalavras ( char *ficheiro, st_texto *t)
     exit ( 4 );
   }
   for ( i = 0; i < (*t).n_total_palavras; i++ )	{
-  /* -- Insert code for memory allocation --*/
-    (*t).palavras[i] = (char*) malloc(sizeof(char)*(n_max_caracteres + 1));
-    if ( (*t).palavras[i] == NULL ) {
+    (*t).palavras[i] = NULL; /* initialize table, allocate words as needed in
+							   	PreencheTabelaPalavras */
+/*    No need for this here now 
+ *    if ( (*t).palavras[i] == NULL ) {
       fprintf ( stderr, "ERROR: not enough memory available!\n" );
       exit ( 3 );
-    }
+    } */
 
-    (*t).palavras[i][0] = '\0'; /* -- INSERT code to initialize table of strings  --*/
+   /* (*t).palavras[i][0] = '\0';  -- INSERT code to initialize table of strings  --*/
     (*t).ocorrencias[i] = 0;    /* -- INSERT code to initialize table  of counters --*/ ;
   }
 
@@ -151,7 +152,11 @@ int NovaPalavra ( char *palavra, st_texto *t )
   /* This function searches for a word in the table.
      if the word is not found returns -1,
      Otherwise returns the position of the word in the table */
-  while ( ( (*t).palavras[i][0] != '\0' ) && i < (*t).n_total_palavras ) {
+  /*
+   *	small change for our model
+   * */
+ /* while ( ( (*t).palavras[i][0] != '\0' ) && i < (*t).n_total_palavras ) { */
+  while ((*t).palavras[i]) { /* compare diff NULL, if null, no word */
     if ( strcmp ( (*t).palavras[i], palavra ) == 0 )
       return (i);
     i++;
@@ -181,6 +186,13 @@ void PreencheTabelaPalavras ( char *ficheiro, st_texto *t )
   f = AbreFicheiro ( ficheiro, "r" );
   while ( ( palavra = LePalavra ( f ) ) != NULL ) {
     if ( ( n = NovaPalavra ( palavra, &(*t) ) ) == -1 )	{
+	  /* allocate word here */
+	  (*t).palavras[(*t).n_dist_palavras] = (char*) malloc(sizeof(char)*(strlen(palavra) + 1));
+
+      if ( (*t).palavras[(*t).n_dist_palavras] == NULL ) {
+        fprintf ( stderr, "ERROR: not enough memory available!\n" );
+        exit ( 3 );
+      }
       strcpy ( (*t).palavras[(*t).n_dist_palavras], palavra );
       (*t).ocorrencias[(*t).n_dist_palavras]++;
       (*t).n_dist_palavras++;
@@ -260,7 +272,7 @@ int main ( int argc, char **argv )
 
 
   /* freeing memory */
-  for (i = 0; i < st_palavras.n_total_palavras; i++)
+  for (i = 0; i < st_palavras.n_dist_palavras; i++)
     free(st_palavras.palavras[i]);
   
   free(st_palavras.ocorrencias);
